@@ -1,7 +1,6 @@
 from django.urls import path
 
 from upload.controllers.upload import (
-    UploadTryController,
     UploadStartController,
     UploadPauseController,
     UploadResumeController,
@@ -12,7 +11,6 @@ from upload.controllers.upload import (
 app_name = "upload"
 
 urlpatterns = [
-    path("try", UploadTryController.as_view(), name="upload_try"),
     path("start", UploadStartController.as_view(), name="upload_start"),
     path("pause", UploadPauseController.as_view(), name="upload_pause"),
     path("resume", UploadResumeController.as_view(), name="upload_resume"),
