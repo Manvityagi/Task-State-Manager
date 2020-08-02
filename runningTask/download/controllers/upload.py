@@ -5,7 +5,9 @@ from rest_framework.views import APIView
 
 from upload.managers.upload import UploadManager
 
-global manager
+roll_back_checkpoint = None
+userId = None
+
 
 class UploadStartController(APIView):
     """Controller for starting upload
@@ -16,34 +18,31 @@ class UploadStartController(APIView):
         global userId
         userId = data["userid"]
 
-        global manager
+        global roll_back_checkpoint
         manager = UploadManager(userId)
 
         thread = Thread(manager.start())
         thread.start()
 
-        return Response("Status : Upload Started")
+        # roll_back_checkpoint = manager.get_checkpoint()
+
+        return Response("Status : Thread Started")
 
 
 class UploadPauseController(APIView):
     def post(self, request):
-        global manager
-        manager.pause()
-        return Response("Status : Upload Paused")
+        pass
 
 
 class UploadResumeController(APIView):
     def post(self, request):
-        global manager
-        manager.resume()
-        return Response("Status : Upload Resumed")
+        pass
 
 
 class UploadTerminateController(APIView):
     def get(self, request):
-        global manager
-        manager.terminate()
-        return Response("Status : Upload Terminated")
+        pass
+
 
 class UploadProgressController(APIView):
     def get(self, request):

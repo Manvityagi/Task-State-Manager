@@ -12,11 +12,11 @@ class UploadManager:
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
+        self.c = connection.cursor()
         super().__init__()
 
     def create_table(self):
         try:
-            c = connection.cursor 
             query = f'CREATE TABLE {self.table_name} (\
             Sid SERIAL PRIMARY KEY, \
             Region varchar(255), \
@@ -32,12 +32,11 @@ class UploadManager:
             "Total Cost" FLOAT,\
             "Total Profit" FLOAT\
             );'
-            c.execute(query)
+            self.c.execute(query)
         finally:
-            c.close()
+            self.c.close()
 
     def start(self):
-        c = connection.cursor 
         self.create_table()
         self.isPaused = False
         self.isTerminated = False
@@ -64,12 +63,11 @@ class UploadManager:
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
                 query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
-                print(query)
-                c.execute(query)
+                self.c.execute(query)
                 self.lines_read += 1
                 if(self.check_status()):
                     raise InterruptException
-            except InterruptException:
+            except:
                 break
 
     # def get_checkpoint(self):
@@ -91,7 +89,5 @@ class UploadManager:
         """
             Rollback
         """
-        c = connection.cursor 
-        self.isTerminated = True
         query = f"DROP TABLE IF EXISTS {self.table_name}"
-        c.execute(query)        
+        self.c.execute(query)        
