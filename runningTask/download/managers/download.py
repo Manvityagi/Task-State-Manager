@@ -12,8 +12,11 @@ class DownloadManager:
         self.isTerminated = False
         self.progress = 0
         self.headers = ""
+        self.c = connection.cursor()
         query = f"SELECT MAX(Sid) FROM {self.tableName}"
-        self.total_entries = c.execute(query)
+        print(self.tableName)
+        print(query)
+        self.total_entries = self.c.execute(query)
         super().__init__()
 
 
@@ -22,6 +25,8 @@ class DownloadManager:
         f = open(f"./{self.tableName}.csv",  'w+')
         self.isPaused = False
         self.isTerminated = False
+        print(self.total_entries)
+        print(self.currentRow)
         while(self.total_entries - self.currentRow > 0):
             try:
                 self.currentRow += 1
