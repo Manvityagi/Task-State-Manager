@@ -12,20 +12,17 @@ class DownloadManager:
         self.isTerminated = False
         self.progress = 0
         self.headers = ""
+        query = f"SELECT MAX(Sid) FROM {self.tableName}"
+        self.total_entries = c.execute(query)
         super().__init__()
 
 
     def start(self):
         c = connection.cursor()
+        f = open(f"./{self.tableName}.csv",  'w+')
         self.isPaused = False
         self.isTerminated = False
-
-        query = f"SELECT MAX(Sid) FROM {self.tableName}"
-        total_entries = c.execute(query)
-
-        f = open(f"./{self.tableName}.csv",  'w')
-
-        while(total_entries - self.currentRow):
+        while(self.total_entries - self.currentRow > 0):
             try:
                 self.currentRow += 1
                 query = f"SELECT * FROM {self.tableName} WHERE SNo={self.currentRow}"
@@ -40,7 +37,6 @@ class DownloadManager:
         self.isPaused = True
 
     def resume(self):
-        self.isPaused = False
         self.start()
 
     def check_status(self):
