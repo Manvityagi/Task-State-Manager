@@ -1,9 +1,9 @@
 import pandas as pd
 from django.db import connection
-from upload.managers.exception import InterruptException
+from download.managers.exception import InterruptException
 
 
-class UploadManager:
+class DownloadManager:
     def __init__(self, userId, file_name="Records.csv"):
         self.userId = userId
         self.file_name = file_name
@@ -12,11 +12,12 @@ class UploadManager:
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
-        self.c = connection.cursor()
+        self.headers = ""
         super().__init__()
 
     def create_table(self):
         try:
+            c = connection.cursor()
             query = f'CREATE TABLE {self.table_name} (\
             Sid SERIAL PRIMARY KEY, \
             Region varchar(255), \
@@ -32,28 +33,29 @@ class UploadManager:
             "Total Cost" FLOAT,\
             "Total Profit" FLOAT\
             );'
-            self.c.execute(query)
+            c.execute(query)
+            df = pd.read_csv(self.file_name, skiprows=self.lines_read)
+            self.headers = df.columns.to_list()
+            tmp = ""
+            for i in self.headers:
+                if(len(tmp) != 0):
+                    tmp += ","
+                if len(str(i).split(' ')) == 1:
+                    tmp += str(i)
+                else:
+                    tmp += "\"" + str(i) + "\""
+            self.headers = tmp
         finally:
-            self.c.close()
+            c.close()
 
     def start(self):
-        self.create_table()
+        c = connection.cursor() 
+        if(self.lines_read == 0):
+            self.create_table()
         self.isPaused = False
         self.isTerminated = False
-
         df = pd.read_csv(self.file_name, skiprows=self.lines_read)
         rows_list = [list(row) for row in df.values]
-        headers = df.columns.to_list()
-        tmp = ""
-        for i in headers:
-            if(len(tmp) != 0):
-                tmp += ","
-            if len(str(i).split(' ')) == 1:
-                tmp += str(i)
-            else:
-                tmp += "\"" + str(i) + "\""
-        headers = tmp
-
         for row in rows_list:
             try:
                 tmp = ""
@@ -62,18 +64,15 @@ class UploadManager:
                         tmp += ","
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
-                query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
-                self.c.execute(query)
+                query = f"INSERT INTO {self.table_name}({self.headers}) VALUES({row});"
+                c.execute(query)
                 self.lines_read += 1
-                if(self.check_status()):
+                status = self.check_status()
+                # print(status)
+                if(status):
                     raise InterruptException
-            except:
+            except InterruptException:
                 break
-
-    # def get_checkpoint(self):
-    #     query = f"SELECT MAX(Sid) from {self.table_name}"
-    #     roll_back_checkpoint = self.c.execute(query)
-    #     return roll_back_checkpoint
 
     def pause(self):
         self.isPaused = True
@@ -89,5 +88,7 @@ class UploadManager:
         """
             Rollback
         """
+        c = connection.cursor() 
+        self.isTerminated = True
         query = f"DROP TABLE IF EXISTS {self.table_name}"
-        self.c.execute(query)        
+        c.execute(query)        

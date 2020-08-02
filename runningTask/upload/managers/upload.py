@@ -35,7 +35,6 @@ class UploadManager:
             );'
             c.execute(query)
             df = pd.read_csv(self.file_name, skiprows=self.lines_read)
-            rows_list = [list(row) for row in df.values]
             self.headers = df.columns.to_list()
             tmp = ""
             for i in self.headers:
@@ -66,20 +65,14 @@ class UploadManager:
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
                 query = f"INSERT INTO {self.table_name}({self.headers}) VALUES({row});"
-                # print(query)
                 c.execute(query)
                 self.lines_read += 1
                 status = self.check_status()
-                print(status)
+                # print(status)
                 if(status):
                     raise InterruptException
             except InterruptException:
                 break
-
-    # def get_checkpoint(self):
-    #     query = f"SELECT MAX(Sid) from {self.table_name}"
-    #     roll_back_checkpoint = self.c.execute(query)
-    #     return roll_back_checkpoint
 
     def pause(self):
         self.isPaused = True
