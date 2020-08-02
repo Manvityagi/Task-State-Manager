@@ -74,11 +74,29 @@
         });
       }
       function resume() {
-        const res = $("#resumeProcess").html();
+        const res = $("#resumeProcess").html().trim();
         if (res === "Pause") {
           $("#resumeProcess").html("Resume");
+          $.ajax({
+            type: "POST",
+            url: "http://127.0.0.1:8000/upload/pause",
+            data: {
+            },
+            success: (data) => {
+              console.log(data);
+            },
+          });
         } else {
           $("#resumeProcess").html("Pause");
+          $.ajax({
+            type: "POST",
+            url: "http://127.0.0.1:8000/upload/resume",
+            data: {
+            },
+            success: (data) => {
+              console.log(data);
+            },
+          });
         }
       }
       function terminate() {
