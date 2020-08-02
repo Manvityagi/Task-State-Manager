@@ -4,75 +4,37 @@ from download.managers.exception import InterruptException
 
 
 class DownloadManager:
-    def __init__(self, userId, file_name="Records.csv"):
+    def __init__(self, userId):
         self.userId = userId
-        self.file_name = file_name
-        self.table_name = userId
-        self.lines_read = 0
+        self.tableName = userId
+        self.currentRow = 0
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
         self.headers = ""
         super().__init__()
 
-    def create_table(self):
-        try:
-            c = connection.cursor()
-            query = f'CREATE TABLE {self.table_name} (\
-            Sid SERIAL PRIMARY KEY, \
-            Region varchar(255), \
-            Country varchar(255), \
-            "Item Type" varchar(255), \
-            "Sales Channel" varchar(255), \
-            "Order Priority" varchar(255), \
-            "Order ID" varchar(255), \
-            "Units Sold" FLOAT,\
-            "Unit Price" FLOAT,\
-            "Unit Cost" FLOAT,\
-            "Total Revenue" FLOAT,\
-            "Total Cost" FLOAT,\
-            "Total Profit" FLOAT\
-            );'
-            c.execute(query)
-            df = pd.read_csv(self.file_name, skiprows=self.lines_read)
-            self.headers = df.columns.to_list()
-            tmp = ""
-            for i in self.headers:
-                if(len(tmp) != 0):
-                    tmp += ","
-                if len(str(i).split(' ')) == 1:
-                    tmp += str(i)
-                else:
-                    tmp += "\"" + str(i) + "\""
-            self.headers = tmp
-        finally:
-            c.close()
 
     def start(self):
-        c = connection.cursor() 
-        if(self.lines_read == 0):
-            self.create_table()
+        c = connection.cursor()
         self.isPaused = False
         self.isTerminated = False
-        df = pd.read_csv(self.file_name, skiprows=self.lines_read)
-        rows_list = [list(row) for row in df.values]
-        for row in rows_list:
+
+        query = f"SELECT MAX(Sid) FROM {self.tableName}"
+        total_entries = c.execute(query)
+
+        f = open(f"./{self.tableName}.csv",  'w')
+
+        while(total_entries - self.currentRow):
             try:
-                tmp = ""
-                for i in row:
-                    if(len(tmp) != 0):
-                        tmp += ","
-                    tmp += "\'" + str(i) + "\'"
-                row = tmp
-                query = f"INSERT INTO {self.table_name}({self.headers}) VALUES({row});"
-                c.execute(query)
-                self.lines_read += 1
-                status = self.check_status()
-                # print(status)
-                if(status):
-                    raise InterruptException
+                self.currentRow += 1
+                query = f"SELECT * FROM {self.tableName} WHERE SNo={self.currentRow}"
+                data = c.execute(query)
+                f.write(data)
             except InterruptException:
-                break
+                f.close()
+                return
+
 
     def pause(self):
         self.isPaused = True
@@ -90,5 +52,5 @@ class DownloadManager:
         """
         c = connection.cursor() 
         self.isTerminated = True
-        query = f"DROP TABLE IF EXISTS {self.table_name}"
+        query = f"DROP TABLE IF EXISTS {self.tableName}"
         c.execute(query)        
