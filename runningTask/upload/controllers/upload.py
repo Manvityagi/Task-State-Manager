@@ -40,7 +40,7 @@ class UploadResumeController(APIView):
 
 
 class UploadTerminateController(APIView):
-    def get(self, request):
+    def post(self, request):
         global manager
         manager.terminate()
         return Response("Status : Upload Terminated")
