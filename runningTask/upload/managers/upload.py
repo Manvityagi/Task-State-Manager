@@ -12,6 +12,7 @@ class UploadManager:
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
+        self.headers = ""
         super().__init__()
 
     def create_table(self):
@@ -33,6 +34,18 @@ class UploadManager:
             "Total Profit" FLOAT\
             );'
             c.execute(query)
+            df = pd.read_csv(self.file_name, skiprows=self.lines_read)
+            rows_list = [list(row) for row in df.values]
+            self.headers = df.columns.to_list()
+            tmp = ""
+            for i in self.headers:
+                if(len(tmp) != 0):
+                    tmp += ","
+                if len(str(i).split(' ')) == 1:
+                    tmp += str(i)
+                else:
+                    tmp += "\"" + str(i) + "\""
+            self.headers = tmp
         finally:
             c.close()
 
@@ -42,20 +55,8 @@ class UploadManager:
             self.create_table()
         self.isPaused = False
         self.isTerminated = False
-
         df = pd.read_csv(self.file_name, skiprows=self.lines_read)
         rows_list = [list(row) for row in df.values]
-        headers = df.columns.to_list()
-        tmp = ""
-        for i in headers:
-            if(len(tmp) != 0):
-                tmp += ","
-            if len(str(i).split(' ')) == 1:
-                tmp += str(i)
-            else:
-                tmp += "\"" + str(i) + "\""
-        headers = tmp
-
         for row in rows_list:
             try:
                 tmp = ""
@@ -64,7 +65,7 @@ class UploadManager:
                         tmp += ","
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
-                query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
+                query = f"INSERT INTO {self.table_name}({self.headers}) VALUES({row});"
                 # print(query)
                 c.execute(query)
                 self.lines_read += 1
