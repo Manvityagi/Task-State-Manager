@@ -3,7 +3,7 @@ from threading import Thread
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from download.managers.Download import DownloadManager
+from download.managers.download import DownloadManager
 
 global manager
 
