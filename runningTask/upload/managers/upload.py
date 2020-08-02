@@ -1,37 +1,95 @@
 import pandas as pd
-# will have to make the table name unique
+from django.db import connection
+from upload.managers.exception import InterruptException
+
+
 class UploadManager:
-    def __init__(self,userId,file_name="Records.csv"):
+    def __init__(self, userId, file_name="Records.csv"):
         self.userId = userId
         self.file_name = file_name
-        self.table_name = userId 
-        self.lines = 0
+        self.table_name = userId
+        self.lines_read = 0
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
-        # super().__init__()
-    
-    @staticmethod
-    def start(userId):
-        print("in thread of manager start")
-        pass #will call checkstatus here
-    
-    @staticmethod
-    def get_checkpoint(userId):
-        print("get the checkpoint")
-        pass
+        super().__init__()
+
+    def create_table(self):
+        try:
+            c = connection.cursor()
+            query = f'CREATE TABLE {self.table_name} (\
+            Sid SERIAL PRIMARY KEY, \
+            Region varchar(255), \
+            Country varchar(255), \
+            "Item Type" varchar(255), \
+            "Sales Channel" varchar(255), \
+            "Order Priority" varchar(255), \
+            "Order ID" varchar(255), \
+            "Units Sold" FLOAT,\
+            "Unit Price" FLOAT,\
+            "Unit Cost" FLOAT,\
+            "Total Revenue" FLOAT,\
+            "Total Cost" FLOAT,\
+            "Total Profit" FLOAT\
+            );'
+            c.execute(query)
+        finally:
+            c.close()
+
+    def start(self):
+        self.create_table()
+        c = connection.cursor()
+        self.isPaused = False
+        self.isTerminated = False
+
+        df = pd.read_csv(self.file_name, skiprows=self.lines_read)
+        rows_list = [list(row) for row in df.values]
+        headers = df.columns.to_list()
+        tmp = ""
+        for i in headers:
+            if(len(tmp) != 0):
+                tmp += ","
+            if len(str(i).split(' ')) == 1:
+                tmp += str(i)
+            else:
+                tmp += "\"" + str(i) + "\""
+        headers = tmp
+
+        for row in rows_list:
+            try:
+                tmp = ""
+                for i in row:
+                    if(len(tmp) != 0):
+                        tmp += ","
+                    tmp += "\'" + str(i) + "\'"
+                row = tmp
+                query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
+                c.execute(query)
+                self.lines_read += 1
+                if(self.check_status()):
+                    raise InterruptException
+            except:
+                break
+
+
+    def get_checkpoint(self):
+        c = connection.cursor()
+        query = f"SELECT MAX(Sid) from {self.table_name}"
+        roll_back_checkpoint = c.execute(query)
+        return roll_back_checkpoint
 
     def pause(self):
-        pass
+        self.isPaused = True
 
     def resume(self):
-        pass
+        self.isPaused = False
 
     def check_status(self):
-        pass
-    
+        return self.isPaused or self.isTerminated
+
     def terminate(self):
+        """
+            Rollback
+        """
+        # delete  {self.tableName}
         pass
-
-
-

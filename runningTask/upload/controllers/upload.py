@@ -9,22 +9,23 @@ roll_back_checkpoint = None
 userId = None
 
 
-
 class UploadStartController(APIView):
     """Controller for starting upload
     """
-# create table kaha call karu 
+
     def post(self, request):
         data = request.data
         global userId
         userId = data["userid"]
 
-        global roll_back_checkpoint 
-        roll_back_checkpoint = UploadManager.get_checkpoint(userId)
+        global roll_back_checkpoint
+        manager = UploadManager(userId)
 
-
-        thread = Thread(UploadManager.start(userId))
+        thread = Thread(manager.start())
         thread.start()
+
+        # roll_back_checkpoint = manager.get_checkpoint()
+
         return Response("Status : Thread Started")
 
 
