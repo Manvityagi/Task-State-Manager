@@ -38,7 +38,8 @@ class UploadManager:
 
     def start(self):
         c = connection.cursor() 
-        self.create_table()
+        if(self.lines_read == 0):
+            self.create_table()
         self.isPaused = False
         self.isTerminated = False
 
@@ -67,7 +68,9 @@ class UploadManager:
                 # print(query)
                 c.execute(query)
                 self.lines_read += 1
-                if(self.check_status()):
+                status = self.check_status()
+                print(status)
+                if(status):
                     raise InterruptException
             except InterruptException:
                 break
