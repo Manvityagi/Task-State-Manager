@@ -16,7 +16,7 @@ class UploadManager:
 
     def create_table(self):
         try:
-            c = connection.cursor 
+            c = connection.cursor()
             query = f'CREATE TABLE {self.table_name} (\
             Sid SERIAL PRIMARY KEY, \
             Region varchar(255), \
@@ -37,7 +37,7 @@ class UploadManager:
             c.close()
 
     def start(self):
-        c = connection.cursor 
+        c = connection.cursor() 
         self.create_table()
         self.isPaused = False
         self.isTerminated = False
@@ -64,7 +64,7 @@ class UploadManager:
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
                 query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
-                print(query)
+                # print(query)
                 c.execute(query)
                 self.lines_read += 1
                 if(self.check_status()):
@@ -91,7 +91,7 @@ class UploadManager:
         """
             Rollback
         """
-        c = connection.cursor 
+        c = connection.cursor() 
         self.isTerminated = True
         query = f"DROP TABLE IF EXISTS {self.table_name}"
         c.execute(query)        
