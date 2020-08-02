@@ -12,11 +12,11 @@ class UploadManager:
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
+        self.c = connection.cursor()
         super().__init__()
 
     def create_table(self):
         try:
-            c = connection.cursor()
             query = f'CREATE TABLE {self.table_name} (\
             Sid SERIAL PRIMARY KEY, \
             Region varchar(255), \
@@ -32,13 +32,12 @@ class UploadManager:
             "Total Cost" FLOAT,\
             "Total Profit" FLOAT\
             );'
-            c.execute(query)
+            self.c.execute(query)
         finally:
-            c.close()
+            self.c.close()
 
     def start(self):
         self.create_table()
-        c = connection.cursor()
         self.isPaused = False
         self.isTerminated = False
 
@@ -64,25 +63,24 @@ class UploadManager:
                     tmp += "\'" + str(i) + "\'"
                 row = tmp
                 query = f"INSERT INTO {self.table_name}({headers}) VALUES({row});"
-                c.execute(query)
+                self.c.execute(query)
                 self.lines_read += 1
                 if(self.check_status()):
                     raise InterruptException
             except:
                 break
 
-
-    def get_checkpoint(self):
-        c = connection.cursor()
-        query = f"SELECT MAX(Sid) from {self.table_name}"
-        roll_back_checkpoint = c.execute(query)
-        return roll_back_checkpoint
+    # def get_checkpoint(self):
+    #     query = f"SELECT MAX(Sid) from {self.table_name}"
+    #     roll_back_checkpoint = self.c.execute(query)
+    #     return roll_back_checkpoint
 
     def pause(self):
         self.isPaused = True
 
     def resume(self):
         self.isPaused = False
+        self.start()
 
     def check_status(self):
         return self.isPaused or self.isTerminated
@@ -91,5 +89,5 @@ class UploadManager:
         """
             Rollback
         """
-        # delete  {self.tableName}
-        pass
+        query = f"DROP TABLE IF EXISTS {self.table_name}"
+        self.c.execute(query)        
