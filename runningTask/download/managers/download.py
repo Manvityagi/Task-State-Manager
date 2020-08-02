@@ -11,27 +11,40 @@ class DownloadManager:
         self.isPaused = False
         self.isTerminated = False
         self.progress = 0
-        self.headers = ""
+        self.headers = []
         self.c = connection.cursor()
+        query = f"select column_name\
+            from information_schema.columns\
+            where table_schema = 'public' and table_name = \'{self.tableName}\';"
+        data = self.c.execute(query)
+        while True:
+            data = self.c.fetchone()
+            if data == None:
+                self.headers = ','.join(self.headers)
+                break
+            self.headers.append(str(data[0]))
         query = f"SELECT MAX(Sid) FROM {self.tableName}"
-        print(self.tableName)
-        print(query)
-        self.total_entries = self.c.execute(query)
+        self.c.execute(query)
+        self.total_entries = self.c.fetchone()[0]
         super().__init__()
 
 
     def start(self):
         c = connection.cursor()
         f = open(f"./{self.tableName}.csv",  'w+')
+        if self.currentRow == 0:
+            f = open(f"./{self.tableName}.csv",  'w')
+            f.write(self.headers)
         self.isPaused = False
         self.isTerminated = False
-        print(self.total_entries)
-        print(self.currentRow)
         while(self.total_entries - self.currentRow > 0):
             try:
                 self.currentRow += 1
-                query = f"SELECT * FROM {self.tableName} WHERE SNo={self.currentRow}"
+                query = f"SELECT * FROM {self.tableName} WHERE Sid={self.currentRow}"
                 data = c.execute(query)
+                data = c.fetchone()
+                data = ','.join(str(e) for e in data)
+                f.write('\n')
                 f.write(data)
             except InterruptException:
                 f.close()
