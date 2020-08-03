@@ -46,10 +46,12 @@ class DownloadManager:
             InterruptException: When the download is paused or terminated. 
         """
         c = connection.cursor()
-        f = open(f"./{self.tableName}.csv", "w+")
+        f = None
         if self.currentRow == 0:
-            f = open(f"./{self.tableName}.csv", "w")
+            f = open(f"./{self.tableName}.csv", "w+")
             f.write(self.headers)
+        else:
+            f = open(f"./{self.tableName}.csv", "a+")
         self.isPaused = False
         self.isTerminated = False
         while self.total_entries - self.currentRow > 0:
@@ -57,7 +59,7 @@ class DownloadManager:
                 if self.check_status():
                     raise InterruptException
                 self.currentRow += 1
-                self.progress = self.currentRow / self.total_entries * 100
+                self.progress = int(self.currentRow / self.total_entries * 100)
                 query = f"SELECT * FROM {self.tableName} WHERE Sid={self.currentRow}"
                 data = c.execute(query)
                 data = c.fetchone()
@@ -78,6 +80,8 @@ class DownloadManager:
         """
         Method to resume download of rows from csv file into database. 
         """
+        if self.isTerminated:
+            return
         self.isPaused = False
         self.start()
 

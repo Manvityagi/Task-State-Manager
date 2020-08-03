@@ -110,6 +110,8 @@ class UploadManager:
         """
         Method to resume upload of rows from csv file into database. 
         """
+        if self.is_terminated:
+            return
         self.is_paused = False
         self.start()
 
