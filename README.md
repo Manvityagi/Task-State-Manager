@@ -89,9 +89,9 @@ $ python manage.py runserver
  ```
  
  ## Demo Images
-![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo1.png)
-![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo2.png)
-![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo3.png)
+![](https://github.com/Manvityagi/Task-State-Manager/blob/master/images/demo%60.PNG)
+![](https://github.com/Manvityagi/Task-State-Manager/blob/master/images/demo2.PNG)
+![](https://github.com/Manvityagi/Task-State-Manager/blob/master/images/demo3.PNG)
 
 
 
