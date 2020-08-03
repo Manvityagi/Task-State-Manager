@@ -1,5 +1,8 @@
+import os
+
 import pandas as pd
 from django.db import connection
+
 from download.managers.exception import InterruptException
 
 
@@ -55,6 +58,7 @@ class DownloadManager:
         self.isPaused = True
 
     def resume(self):
+        self.isPaused = False
         self.start()
 
     def check_status(self):
@@ -64,7 +68,8 @@ class DownloadManager:
         """
             Rollback
         """
-        c = connection.cursor() 
         self.isTerminated = True
-        query = f"DROP TABLE IF EXISTS {self.tableName}"
-        c.execute(query)        
+        try:
+            os.remove(f"./{self.tableName}.csv")
+        except FileNotFoundError:
+            return "Trying to delete non-existent file."
