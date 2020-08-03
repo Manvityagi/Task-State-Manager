@@ -1,5 +1,5 @@
 # Introduction
-![](https://github.com/Manvityagi/Entry-Management-Software/raw/master/images/EMS1.png)
+![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/start.png)
 
 **Task State Manager** is an implementation of an upload/download system in which the functionality of pausing/resuming/terminating the task at hand is poosible.
 
@@ -89,9 +89,9 @@ $ python manage.py runserver
  ```
  
  ## Demo Images
- ### Check-in Page
- ![Check-in Page](https://github.com/Manvityagi/Entry-Management-Software/raw/master/images/checkin.png)
-
+![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo1.png)
+![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo2.png)
+![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/demo3.png)
 
 
 
