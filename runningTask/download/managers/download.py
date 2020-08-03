@@ -48,10 +48,10 @@ class DownloadManager:
         c = connection.cursor()
         f = None
         if self.currentRow == 0:
-            f = open(f"./{self.tableName}.csv", "w+")
+            f = open(f"./public/{self.tableName}.csv", "w+")
             f.write(self.headers)
         else:
-            f = open(f"./{self.tableName}.csv", "a+")
+            f = open(f"./public/{self.tableName}.csv", "a+")
         self.isPaused = False
         self.isTerminated = False
         while self.total_entries - self.currentRow > 0:
