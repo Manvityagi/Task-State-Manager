@@ -21,11 +21,19 @@
       <div class="row" style="margin-top: 35%; margin-left: 35%;">
         <input
           id="tableName"
-          style="width: 250px;"
+          style="width: 250px; margin-right: 10px;"
           class="form-control"
           type="text"
           placeholder="Enter your company name"
         />
+        <div id = "uploadLoader" style="display: none;">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <div style="margin-left:10px;">
+            <span id="completed">0%</span> Completed
+          </div>
+        </div>
       </div>
       <div class="row" style="margin-top: 10px; margin-left: 35%;">
         <button
@@ -56,6 +64,21 @@
     </div>
 
     <script>
+      let Interval;
+      function startLoader(){
+        $('#uploadLoader').show();
+        Interval = setInterval(()=>{
+          $.getJSON('http://127.0.0.1:8000/upload/progress',(data)=>{
+            data = parseInt(data);
+            $('#completed').html(data.toString());
+            if(data == 100)stopLoader();
+          })
+        },500);
+      }
+      function stopLoader(){
+        $('#uploadLoader').hide();
+        clearInterval(Interval);
+      }
       function start() {
         $("#startProcess").hide();
         $("#resumeProcess").show();
@@ -72,6 +95,7 @@
             console.log(data);
           },
         });
+        startLoader();
       }
       function resume() {
         const res = $("#resumeProcess").html().trim();
@@ -113,6 +137,7 @@
         $("#resumeProcess").hide();
         $("#terminateProcess").hide();
         $("#tableName").prop("disabled", false);
+        stopLoader();
       }
     </script>
   </body>
