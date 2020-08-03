@@ -55,6 +55,7 @@ class DownloadManager:
         while self.total_entries - self.currentRow > 0:
             try:
                 self.currentRow += 1
+                self.progress = self.currentRow / self.total_entries * 100
                 query = f"SELECT * FROM {self.tableName} WHERE Sid={self.currentRow}"
                 data = c.execute(query)
                 data = c.fetchone()
@@ -95,3 +96,9 @@ class DownloadManager:
             os.remove(f"./{self.tableName}.csv")
         except FileNotFoundError:
             return "Trying to delete non-existent file."
+
+    def get_progress(self):
+        """
+            Method to get percentage completion of download.
+        """
+        return self.progress

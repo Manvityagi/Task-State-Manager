@@ -4,7 +4,7 @@ from download.controllers.download import (
     DownloadStartController,
     DownloadPauseController,
     DownloadResumeController,
-    # DownloadRollbackController,
+    DownloadProgressController,
     DownloadTerminateController,
 )
 
@@ -17,5 +17,5 @@ urlpatterns = [
     path(
         "terminate", DownloadTerminateController.as_view(), name="download_terminate",
     ),
-    # path("rollback", DownloadRollbackController.as_view(), name="Download_rollback"),
+    path("progress", DownloadProgressController.as_view(), name="download_progress"),
 ]

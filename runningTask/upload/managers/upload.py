@@ -21,6 +21,7 @@ class UploadManager:
         self.is_terminated = False
         self.progress = 0
         self.headers = ""
+        self.total_rows = 0
         super().__init__()
 
     # duplicate table name ko handle kar lena yaha
@@ -70,13 +71,16 @@ class UploadManager:
             InterruptException: When the upload is paused or terminated. 
         """
         c = connection.cursor()
-        if self.lines_read == 0:
-            self.create_table()
+
         self.is_paused = False
         self.is_terminated = False
 
         df = pd.read_csv(self.file_name, skiprows=self.lines_read)
         rows_list = [list(row) for row in df.values]
+
+        if self.lines_read == 0:
+            self.create_table()
+            self.total_rows = len(df)
 
         for row in rows_list:
             try:
@@ -89,6 +93,7 @@ class UploadManager:
                 query = f"INSERT INTO {self.table_name}({self.headers}) VALUES({row});"
                 c.execute(query)
                 self.lines_read += 1
+                self.progress = self.lines_read / self.total_rows * 100
                 status = self.check_status()
                 if status:
                     raise InterruptException
@@ -122,3 +127,9 @@ class UploadManager:
         self.is_terminated = True
         query = f"DROP TABLE IF EXISTS {self.table_name}"
         c.execute(query)
+
+    def get_progress(self):
+        """
+            Method to get percentage completion of upload.
+        """
+        return self.progress

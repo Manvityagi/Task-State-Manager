@@ -85,5 +85,17 @@ class UploadTerminateController(APIView):
 
 
 class UploadProgressController(APIView):
+    """Controller for fetching the percentage of completed upload"""
+
     def get(self, request):
-        pass
+        """Method to terminate and rollback upload of a csv file.
+        
+        Args: 
+            request: A Django HTTP request object.
+        
+        Returns:
+            Response with percnatge upload
+        """
+        global manager
+        progress = manager.get_progress()
+        return Response(progress)

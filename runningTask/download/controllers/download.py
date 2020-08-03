@@ -7,6 +7,7 @@ from download.managers.download import DownloadManager
 
 global manager
 
+
 class DownloadStartController(APIView):
     """Controller for starting download for a given user id."""
 
@@ -82,6 +83,11 @@ class DownloadTerminateController(APIView):
         manager.terminate()
         return Response("Status : Download Terminated")
 
+
 class DownloadProgressController(APIView):
+    """Controller for fetching the percentage of download complete"""
+
     def get(self, request):
-        pass
+        global manager
+        progress = manager.get_progress()
+        return Response(progress)

@@ -4,7 +4,7 @@ from upload.controllers.upload import (
     UploadStartController,
     UploadPauseController,
     UploadResumeController,
-    # UploadRollbackController,
+    UploadProgressController,
     UploadTerminateController,
 )
 
@@ -15,5 +15,5 @@ urlpatterns = [
     path("pause", UploadPauseController.as_view(), name="upload_pause"),
     path("resume", UploadResumeController.as_view(), name="upload_resume"),
     path("terminate", UploadTerminateController.as_view(), name="upload_terminate",),
-    # path("rollback", UploadRollbackController.as_view(), name="upload_rollback"),
+    path("progress", UploadProgressController.as_view(), name="upload_progress"),
 ]
