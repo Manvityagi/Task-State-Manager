@@ -1,5 +1,5 @@
 # Introduction
-![](https://github.com/Manvityagi/Task-State-Manager/raw/master/images/start.png)
+![](https://github.com/Manvityagi/Task-State-Manager/blob/master/images/start.PNG)
 
 **Task State Manager** is an implementation of an upload/download system in which the functionality of pausing/resuming/terminating the task at hand is poosible.
 
