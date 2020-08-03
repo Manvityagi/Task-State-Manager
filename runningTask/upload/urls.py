@@ -17,5 +17,5 @@ urlpatterns = [
     path("resume", UploadResumeController.as_view(), name="upload_resume"),
     path("terminate", UploadTerminateController.as_view(), name="upload_terminate",),
     path("progress", UploadProgressController.as_view(), name="upload_progress"),
-    path("exists", TableExistController.as_view(), name="table_exists"),
+    path("exists/<str:userid>", TableExistController.as_view(), name="table_exists"),
 ]
