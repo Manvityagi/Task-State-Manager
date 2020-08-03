@@ -19,6 +19,9 @@
   <body style="height: 100vh;">
     <div class="container">
       <div class="row" style="margin-top: 35%; margin-left: 35%;">
+        <h4 id="message"></h4>
+      </div>
+      <div class="row" style="margin-top: 20px; margin-left: 35%;">
         <input
           id="tableName"
           style="width: 250px; margin-right: 10px;"
@@ -37,12 +40,20 @@
       </div>
       <div class="row" style="margin-top: 10px; margin-left: 35%;">
         <button
-          onclick="start()"
-          id="startProcess"
+          onclick="uploadSetter()"
+          id="uploadStart"
           class="btn btn-success"
-          style="margin-left: 50px; width: 150px;"
+          style="margin-left: 10px; width: 112px;"
         >
-          Start
+          Upload
+        </button>
+        <button
+          onclick="downloadSetter()"
+          id="downloadStart"
+          class="btn btn-success"
+          style="margin-left: 12px; width: 112px;"
+        >
+          Download
         </button>
         <button
           onclick="resume()"
@@ -53,25 +64,58 @@
           Pause
         </button>
         <button
-          onclick="terminate()"
-          id="terminateProcess"
-          class="btn btn-danger"
-          style="display: none; margin-left: 12px; width: 112px;"
+        onclick="terminate()"
+        id="terminateProcess"
+        class="btn btn-danger"
+        style="display: none; margin-left: 12px; width: 112px;"
         >
-          Terminate
-        </button>
-      </div>
+        Terminate
+      </button>
     </div>
-
-    <script>
+  </div>
+  
+  <script>
       let Interval;
+      let middlePath;
+      function uploadSetter(){
+        middlePath = "upload";
+        const tableName = $("#tableName").val();
+        $.getJSON('http://127.0.0.1:8000/upload/exists/'+tableName,(data)=>{
+          if(data){
+            $("#message").html(`${tableName} already exists`);
+          }else{
+            start();
+          }
+        })
+      }
+      function downloadSetter(){
+        middlePath = "download";
+        const tableName = $("#tableName").val();
+        $.getJSON('http://127.0.0.1:8000/upload/exists/'+tableName,(data)=>{
+          if(!data){
+            $("#message").html(`${tableName} does not exists`);
+          }else{
+            start();
+          }
+        })
+      }
       function startLoader(){
         $('#uploadLoader').show();
         Interval = setInterval(()=>{
-          $.getJSON('http://127.0.0.1:8000/upload/progress',(data)=>{
+          $.getJSON('http://127.0.0.1:8000/' + middlePath + '/progress',(data)=>{
             data = parseInt(data);
             $('#completed').html(data.toString());
-            if(data == 100)stopLoader();
+            if(data == 100){
+              $("#uploadStart").show();
+              $("#downloadStart").show();
+              $("#resumeProcess").hide();
+              $("#terminateProcess").hide();
+              $("#tableName").prop("disabled", false);
+              $("#tableName").val("");
+              const tableName = $("#tableName").val();
+              $("#message").html(`${middlePath} process completed for ${tableName}`);
+              stopLoader();
+            }
           })
         },500);
       }
@@ -80,14 +124,16 @@
         clearInterval(Interval);
       }
       function start() {
-        $("#startProcess").hide();
+        $("#uploadStart").hide();
+        $("#downloadStart").hide();
         $("#resumeProcess").show();
         $("#terminateProcess").show();
         $("#tableName").prop("disabled", true);
         const tableName = $("#tableName").val();
+        $("#message").html(`${middlePath} process started for ${tableName}`)
         $.ajax({
           type: "POST",
-          url: "http://127.0.0.1:8000/upload/start",
+          url: "http://127.0.0.1:8000/" + middlePath + "/start",
           data: {
             userid: tableName,
           },
@@ -99,11 +145,13 @@
       }
       function resume() {
         const res = $("#resumeProcess").html().trim();
+        const tableName = $("#tableName").val();
         if (res === "Pause") {
           $("#resumeProcess").html("Resume");
+          $("#message").html(`${middlePath} process paused for ${tableName}`)
           $.ajax({
             type: "POST",
-            url: "http://127.0.0.1:8000/upload/pause",
+            url: "http://127.0.0.1:8000/" + middlePath + "/pause",
             data: {
             },
             success: (data) => {
@@ -112,9 +160,10 @@
           });
         } else {
           $("#resumeProcess").html("Pause");
+          $("#message").html(`${middlePath} process resumed for ${tableName}`)
           $.ajax({
             type: "POST",
-            url: "http://127.0.0.1:8000/upload/resume",
+            url: "http://127.0.0.1:8000/" + middlePath + "/resume",
             data: {
             },
             success: (data) => {
@@ -124,21 +173,25 @@
         }
       }
       function terminate() {
+        const tableName = $("#tableName").val();
+        $("#message").html(`${middlePath} process Terminated for ${tableName}`)
         $.ajax({
           type: "POST",
-          url: "http://127.0.0.1:8000/upload/terminate",
+          url: "http://127.0.0.1:8000/" + middlePath + "/terminate",
           data: {
           },
           success: (data) => {
             console.log(data);
           },
         });
-        $("#startProcess").show();
+        $("#uploadStart").show();
+        $("#downloadStart").show();
         $("#resumeProcess").hide();
         $("#terminateProcess").hide();
         $("#tableName").prop("disabled", false);
+        $("#tableName").val("");
         stopLoader();
       }
-    </script>
+      </script>
   </body>
-</html>
+  </html>
