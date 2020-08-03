@@ -111,9 +111,14 @@
               $("#resumeProcess").hide();
               $("#terminateProcess").hide();
               $("#tableName").prop("disabled", false);
-              $("#tableName").val("");
               const tableName = $("#tableName").val();
-              $("#message").html(`${middlePath} process completed for ${tableName}`);
+              $("#tableName").val("");
+              if(middlePath === 'upload'){
+                $("#message").html(`${middlePath} process completed for ${tableName}`);
+              }else{
+                $("#message").html(`${middlePath} process completed for ${tableName}: <a href = \"http://127.0.0.1:8000/getFile/${tableName}\">Link</a>`);
+
+              }
               stopLoader();
             }
           })
