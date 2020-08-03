@@ -135,3 +135,13 @@ class UploadManager:
             Method to get percentage completion of upload.
         """
         return self.progress
+
+    def table_exists(self):
+        c = connection.cursor()
+        try:
+            query = f"SELECT MAX(SId) from {self.table_name}"
+            c.execute(query)
+            return True
+        except:
+            return False
+            

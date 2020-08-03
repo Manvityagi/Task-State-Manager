@@ -99,3 +99,20 @@ class UploadProgressController(APIView):
         global manager
         progress = manager.get_progress()
         return Response(progress)
+
+
+class TableExistController(APIView):
+    """Controller for checking if a table exists"""
+
+    def get(self, request, userid):
+        """Method to check if a table exists.
+        
+        Args: 
+            request: A Django HTTP request object.
+        
+        Returns:
+            True if exists, else False
+        """
+        manager = UploadManager(userid)
+        result = manager.table_exists()
+        return Response(result)
