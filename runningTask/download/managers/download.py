@@ -54,6 +54,8 @@ class DownloadManager:
         self.isTerminated = False
         while self.total_entries - self.currentRow > 0:
             try:
+                if self.check_status():
+                    raise InterruptException
                 self.currentRow += 1
                 self.progress = self.currentRow / self.total_entries * 100
                 query = f"SELECT * FROM {self.tableName} WHERE Sid={self.currentRow}"
